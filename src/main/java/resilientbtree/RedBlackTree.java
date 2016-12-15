@@ -38,6 +38,26 @@ public class RedBlackTree implements Serializable, Iterable<RBTNode> {
         }
     }
 
+    /**
+     * Gets the node with the minimum key rooted at root
+     **/
+    private RBTNode getMin(RBTNode root) {
+        while(root.left != null) {
+            root = root.left;
+        }
+        return root;
+    }
+
+    /**
+     * Gets the node with the maximum key rooted at root
+     **/
+    private RBTNode getMax(RBTNode root) {
+        while(root.right != null) {
+            root = root.right;
+        }
+        return root;
+    }
+
     //Tries to find a key in the subtree rooted at node
     private RBTNode _getLower(RBTNode root, int key) {
         if(root == null) {
@@ -210,7 +230,43 @@ public class RedBlackTree implements Serializable, Iterable<RBTNode> {
         return result == null ? null : result.value;
     }
 
-    // Gets a key less than or equal to the current key or null otherwise
+    /**
+     * Gets the minimum key and value in this RBTree
+     * @return
+     */
+    public Tuple<Integer, Integer> min() {
+        if (root != null) {
+            RBTNode min = getMin(root);
+            if (min != null) {
+                return new Tuple<>(min.key, min.value);
+            } else {
+                return null;
+            }
+        } else {
+            return null;
+        }
+    }
+
+    /**
+     * Gets the maximum key and value in this RBTree
+     */
+    public Tuple<Integer, Integer> max() {
+        if (root != null) {
+            RBTNode max = getMax(root);
+            if (max != null) {
+                return new Tuple<>(max.key, max.value);
+            } else {
+                return null;
+            }
+        } else {
+            return null;
+        }
+    }
+
+    /**
+     * Gets a key less than or equal to the current key or null otherwise
+     **/
+
     public Integer getLower(int key) {
         RBTNode result = _getLower(root, key);
         return result == null ? null : result.value;

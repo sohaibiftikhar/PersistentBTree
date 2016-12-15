@@ -37,7 +37,9 @@ public class BTree {
             Iterator<RBTNode> rbtIterator = root.rbTree.iterator();
             root.rbTree = new RedBlackTree();
             RedBlackTree rightRBT = new RedBlackTree();
-            BTreeNode rightBTNode = new BTreeNode(rightRBT, root.isLeaf, root.parent, -1, handler.fileLength());
+            BTreeNode rightBTNode =
+                    new BTreeNode(rightRBT, root.isLeaf, root.parent, -1, handler.fileLength(), root.nextLeafPos);
+            root.nextLeafPos = rightBTNode.selfPosition;
             for (int i=1; i <= rbtSize/2; i++) {
                 RBTNode rbtNode = rbtIterator.next();
                 root.rbTree.put(rbtNode.key, rbtNode.value);
@@ -100,6 +102,25 @@ public class BTree {
         }
     }
 
+    /**
+     * Gets the BTreeNode which contains the key greater than or equal to the current node.
+     * @param key
+     * @return
+     */
+    private BTreeNode getCeil(BTreeNode root, int key) throws IOException {
+        if (root.isLeaf) {
+            if (root.rbTree.max().x < key) {
+                return getBTreeNodeAtIndex(root.nextLeafPos);
+            } else {
+                return root;
+            }
+        } else {
+            int valueLower = root.getLower(key);
+            BTreeNode node = getBTreeNodeAtIndex(valueLower);
+            return getCeil(node, key);
+        }
+    }
+
     public void put(int key, byte[] value) throws IOException {
         int valueInd = valueHandler.append(ByteBuffer.allocate(4 + value.length).putInt(value.length).put(value).array());
         RBTNode toPut = put(root, key, valueInd);
@@ -109,7 +130,8 @@ public class BTree {
                     false,
                     -1,
                     root.selfPosition,
-                    handler.fileLength()
+                    handler.fileLength(),
+                    -1
             );
             newRoot.rbTree.put(toPut.key, toPut.value);
             int position = handler.writeBatch(newRoot.serialize());
@@ -121,6 +143,17 @@ public class BTree {
 
     public byte[] get(int key) throws IOException {
         return get(root, key);
+    }
+
+    /**
+     *
+     * @param keyLow
+     * @param keyHigh
+     * @return Returns all key and values in this btree in the range [keyLow, keyHigh] both inclusive
+     */
+    public Iterable<Tuple<Integer, byte[]>> getInRange(int keyLow, int keyHigh) throws IOException {
+        BTreeNode ceil = getCeil(root, keyLow);
+        return new RangeIterable(ceil, keyLow, keyHigh, handler, valueHandler);
     }
 
     public static BTree makeBTree() throws  IOException {
@@ -141,7 +174,7 @@ public class BTree {
         } else {
             // The tree was empty so start fresh
             // The self position is four because the first 4 bytes [0,3] are taken up by the root address
-            return new BTreeNode(new RedBlackTree(), true, -1, -1, 4);
+            return new BTreeNode(new RedBlackTree(), true, -1, -1, 4, -1);
         }
     }
 

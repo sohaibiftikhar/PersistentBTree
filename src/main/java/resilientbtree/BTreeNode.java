@@ -12,15 +12,17 @@ public class BTreeNode {
     int parent = -1;
     final int phi; // contains link to b tree node with value less the min key in the rbtree
     final int selfPosition;
+    int nextLeafPos;
 
-    static final int metadataSize = 17;
+    static final int metadataSize = 21;
 
-    BTreeNode(RedBlackTree rbTree, boolean isLeaf, int parent, int phi, int selfPosition) {
+    BTreeNode(RedBlackTree rbTree, boolean isLeaf, int parent, int phi, int selfPosition, int nextLeafPos) {
         this.rbTree = rbTree;
         this.isLeaf = isLeaf;
         this.phi = phi;
         this.parent = parent;
         this.selfPosition = selfPosition;
+        this.nextLeafPos = nextLeafPos;
     }
 
     public int getLower(int key) {
@@ -41,6 +43,7 @@ public class BTreeNode {
         buffer.putInt(parent);
         buffer.putInt(phi);
         buffer.putInt(selfPosition);
+        buffer.putInt(nextLeafPos);
         buffer.put(rbTree.serialize());
         return buffer.array();
     }
@@ -54,10 +57,11 @@ public class BTreeNode {
             int parent = buffer.getInt();
             int phi = buffer.getInt();
             int selfPosition = buffer.getInt();
+            int nextLeafPos = buffer.getInt();
             RedBlackTree rbt =
                     RedBlackTree.
                             deserialize(ByteBuffer.wrap(bytes, metadataSize, rbtSize * RBTNode.SERIALIZED_SIZE));
-            return new BTreeNode(rbt, isLeaf, parent, phi, selfPosition);
+            return new BTreeNode(rbt, isLeaf, parent, phi, selfPosition, nextLeafPos);
         } else {
             throw new IOException("Error while deserializing BTreeNode");
         }
