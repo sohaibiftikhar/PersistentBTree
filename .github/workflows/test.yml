@@ -19,5 +19,6 @@ jobs:
           cat ${{ github.event_path }}
   SetStatus:
     needs: PrintJob
-    run: |
-      echo ${{ needs }}
+    steps:
+      run: |
+        echo '${{ needs }}'
