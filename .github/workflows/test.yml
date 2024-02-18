@@ -16,7 +16,7 @@ jobs:
           echo "$GITHUB_CONTEXT"
       - name: SetStatus
         if: ${{ !contains(github.event.pull_request.labels.*.name , 'bug') }}
-      - uses: ouzi-dev/commit-status-updater@v2
+        uses: ouzi-dev/commit-status-updater@v2
         with:
           name: "DummyJob / Status (pull_request)"
           status: pending
