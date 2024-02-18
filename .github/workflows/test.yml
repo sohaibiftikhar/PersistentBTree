@@ -5,23 +5,17 @@ on:
 
 jobs:
   PrintEvent:
-    if: contains(github.event.pull_request.labels.*.name, 'bug')
     name: Status
     runs-on: ubuntu-latest
     steps:
       - name: Dump GitHub context
+        if: contains(github.event.pull_request.labels.*.name, 'bug')
         env:
           GITHUB_CONTEXT: ${{ toJson(github) }}
         run: |
           echo "$GITHUB_CONTEXT"
-      - name: Dump event_path
-        run: |
-          cat ${{ github.event_path }}
-  Status:
-    runs-on: ubuntu-latest
-    if: ${{ !contains(github.event.pull_request.labels.*.name , 'bug') }}
-    name: Status
-    steps:
+      - name: SetStatus
+        if: ${{ !contains(github.event.pull_request.labels.*.name , 'bug') }}
       - uses: ouzi-dev/commit-status-updater@v2
         with:
           name: "DummyJob / Status (pull_request)"
