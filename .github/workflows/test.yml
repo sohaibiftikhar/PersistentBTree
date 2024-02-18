@@ -1,17 +1,19 @@
+name: DummyJob
 on:
   pull_request:
-    types: [labeled, opened, reopened, synchronize]
+    types: [opened, reopened, synchronize]
 
 jobs:
-  printJob:    
+  PrintJob:
+    if: contains(github.event.pull_request.labels.*.name, 'bug')
     name: Print event
     runs-on: ubuntu-latest
     steps:
-    - name: Dump GitHub context
-      env:
-        GITHUB_CONTEXT: ${{ toJson(github) }}
-      run: |
-        echo "$GITHUB_CONTEXT"
-    - name: Dump event_path
-      run: |
-        cat ${{ github.event_path }}
+      - name: Dump GitHub context
+        env:
+          GITHUB_CONTEXT: ${{ toJson(github) }}
+        run: |
+          echo "$GITHUB_CONTEXT"
+      - name: Dump event_path
+        run: |
+          cat ${{ github.event_path }}
