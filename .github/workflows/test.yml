@@ -4,9 +4,9 @@ on:
     types: [opened, reopened, synchronize]
 
 jobs:
-  PrintJob:
+  PrintEvent:
     if: contains(github.event.pull_request.labels.*.name, 'bug')
-    name: Print event
+    name: Status
     runs-on: ubuntu-latest
     steps:
       - name: Dump GitHub context
@@ -17,8 +17,12 @@ jobs:
       - name: Dump event_path
         run: |
           cat ${{ github.event_path }}
-  SetStatus:
-    needs: PrintJob
+  Status:
+    runs-on: ubuntu-latest
+    if: ${{ !contains(github.event.pull_request.labels.*.name , 'bug') }}
+    name: Status
     steps:
-      run: |
-        echo '${{ needs }}'
+      - uses: ouzi-dev/commit-status-updater@v2
+        with:
+          name: "DummyJob / Status (pull_request)"
+          status: pending
