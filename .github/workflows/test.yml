@@ -17,3 +17,7 @@ jobs:
       - name: Dump event_path
         run: |
           cat ${{ github.event_path }}
+  SetStatus:
+    needs: PrintJob
+    run: |
+      echo ${{ needs }}
